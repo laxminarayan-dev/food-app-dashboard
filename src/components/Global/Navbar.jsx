@@ -201,6 +201,7 @@ const Navbar = () => {
           path: "/inventory",
         },
         { id: "staff", label: "Staff", icon: UserRoundCog, path: "/staff" },
+        { id: "branch", label: "Branch", icon: Store, path: "/branch" },
       ],
     },
     {
@@ -378,7 +379,7 @@ const Navbar = () => {
               )}
             </div>
             {/* Saprator */}
-            <div className=" w-[2px] h-6 bg-slate-800/70 rounded-full mr-2"></div>
+            <div className="block md:hidden w-[2px] h-6 bg-slate-800/70 rounded-full mr-2"></div>
             {/* Menu Open/Close */}
             <div className="flex md:hidden">
               <button
@@ -401,65 +402,99 @@ const Navbar = () => {
       {/* Sidebar Box */}
       <div className="flex">
         {/* Sidebar */}
-        <div
-          className={`fixed top-19 border-t border-slate-200 z-[101] h-screen  p-4
-          transform-gpu will-change-transform transition-transform duration-700 ease-out motion-reduce:transition-none
-          ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0 md:block md:w-64 md:transition-none h-screen bg-white text-slate-900 w-64 `}
+        <aside
+          className={`fixed top-19 z-[101] h-[calc(100vh-4.5rem)] p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${
+            isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
+          aria-label="Main sidebar"
         >
-          <div className="flex flex-col justify-between flex-1">
-            <nav className="mx-1 space-y-6 ">
-              {sidebarItems.map((section, index) => (
-                <div key={section.title + index} className="space-y-3 ">
-                  <label className="px-3 text-xs text-gray-500 uppercase  ">
-                    {section.title}
-                  </label>
+          <div className="flex flex-col justify-between h-full">
+            {/* Sidebar header */}
+            <div className="mb-4">
+              <div className="flex items-center gap-3 px-2 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-400 inline-flex items-center justify-center shadow-sm">
+                  <Store className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    Mr Halwai
+                  </div>
+                  <div className="text-xs text-gray-500">Admin Dashboard</div>
+                </div>
+              </div>
 
-                  {section.links.map((link, index) => {
-                    const Icon = link.icon;
-                    return (
-                      <button
-                        key={link.id + index}
-                        type="button"
-                        className={`flex w-full items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-gray-600 cursor-pointer ${
-                          (link.matchPaths
-                            ? link.matchPaths.includes(pathname)
-                            : pathname === link.path) &&
-                          "bg-gradient-to-r from-indigo-400/50 via-indigo-400/30 to-indigo-500/0 "
-                        }`}
-                        onClick={() => {
-                          router.push(link.path);
-                          if (isMobileSidebarOpen) {
-                            setIsMobileSidebarOpen(false);
-                          }
-                        }}
-                      >
-                        <Icon className="w-5 h-5" />
+              <div className="px-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Branch:</span>
+                  <span className="text-sm font-medium text-gray-900 truncate">
+                    {getShopLabel(
+                      shops.find((s) => s?._id === activeShopId) || null,
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-                        <span className="mx-2 text-sm font-medium">
-                          {link.label}
-                        </span>
-                      </button>
-                    );
-                  })}
+            {/* Navigation */}
+            <nav className="mx-1 flex-1 overflow-auto py-2 space-y-6">
+              {sidebarItems.map((section, sidx) => (
+                <div key={section.title + sidx} className="space-y-3">
+                  {section.title && (
+                    <div className="px-3 text-xs text-gray-500 uppercase tracking-wider">
+                      {section.title}
+                    </div>
+                  )}
+
+                  <div className="space-y-1 px-2">
+                    {section.links.map((link, lidx) => {
+                      const Icon = link.icon;
+                      const isActive = link.matchPaths
+                        ? link.matchPaths.includes(pathname)
+                        : pathname === link.path;
+                      return (
+                        <button
+                          key={link.id + lidx}
+                          type="button"
+                          onClick={() => {
+                            router.push(link.path);
+                            if (isMobileSidebarOpen)
+                              setIsMobileSidebarOpen(false);
+                          }}
+                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
+                            isActive
+                              ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
+                              : "text-gray-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span
+                            className={`inline-flex items-center justify-center w-9 h-9 rounded-md ${isActive ? "bg-indigo-500 text-white" : "bg-slate-100 text-indigo-500 group-hover:bg-indigo-50"}`}
+                          >
+                            <Icon className="w-4 h-4" />
+                          </span>
+
+                          <span className="flex-1 text-left font-medium truncate">
+                            {link.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </nav>
           </div>
-        </div>
+        </aside>
 
         {/* Overlay for mobile sidebar */}
         <div
-          className={`fixed bg-slate-900/70 z-[100] md:hidden top-0 left-0 w-full h-screen
-          transition-opacity duration-300 ease-out motion-reduce:transition-none
-          ${
+          className={`fixed bg-slate-900/70 z-[100] md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${
             isMobileSidebarOpen
               ? "opacity-100 pointer-events-auto"
               : "opacity-0 pointer-events-none"
           }`}
           onClick={() => setIsMobileSidebarOpen(false)}
           aria-hidden="true"
-        ></div>
+        />
       </div>
     </>
   );
