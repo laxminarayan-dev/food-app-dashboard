@@ -19,6 +19,9 @@ const InventoryManagement = () => {
         );
         const data = await response.json();
         console.log("Fetched food items:", data);
+        console.log(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}${data[10]?.images?.url}`,
+        );
         setFoodItems(Array.isArray(data) ? data : data.items || []);
       } catch (error) {
         console.error(error);
@@ -68,6 +71,7 @@ const InventoryManagement = () => {
                 width={200}
                 height={200}
                 loading="eager"
+                unoptimized
               />
 
               {/* Clay badges */}
