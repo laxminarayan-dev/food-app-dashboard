@@ -59,7 +59,7 @@ const EditMenuItem = ({ initialData = null }) => {
     availableTimings: initialData?.availableTimings || [],
     days: initialData?.days || [],
     altText: initialData?.altText || "",
-    prepTime: initialData?.prepTime || "",
+    preparationTime: initialData?.preparationTime || "",
   });
 
   // 2. File Upload Handler
@@ -107,7 +107,7 @@ const EditMenuItem = ({ initialData = null }) => {
           stock: data.stock || "",
           lowStockThreshold: data.lowStockThreshold || 5,
           altText: data.altText || "",
-          prepTime: data.prepTime || "",
+          preparationTime: data.preparationTime || "",
         }));
         setPreviewUrl(data.imageUrl || "");
         // Map server response into form shape (map backend fields)
@@ -150,7 +150,7 @@ const EditMenuItem = ({ initialData = null }) => {
               ? data.lowStockThreshold
               : 5,
 
-          prepTime:
+          preparationTime:
             data.preparationTime !== undefined && data.preparationTime !== null
               ? data.preparationTime
               : "",
@@ -463,9 +463,9 @@ const EditMenuItem = ({ initialData = null }) => {
                   <Label>Preparation Time (mins)</Label>
                   <Input
                     type="number"
-                    value={formData.prepTime}
+                    value={formData.preparationTime}
                     onChange={(e) =>
-                      handleInputChange("prepTime", e.target.value)
+                      handleInputChange("preparationTime", e.target.value)
                     }
                   />
                 </div>
@@ -513,11 +513,12 @@ const EditMenuItem = ({ initialData = null }) => {
                 >
                   {previewUrl ? (
                     <Image
-                      src={`https://mrhalwai.in/${previewUrl}`}
-                      alt="Preview"
+                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${previewUrl}`}
+                      alt={`${process.env.NEXT_PUBLIC_BACKEND_URL}${previewUrl}`}
                       width={200}
                       height={200}
                       className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <div className="text-center p-4">

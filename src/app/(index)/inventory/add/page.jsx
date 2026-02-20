@@ -57,7 +57,7 @@ const AddEditMenuItem = ({ initialData = null }) => {
     timings: initialData?.timings || [],
     days: initialData?.days || [],
     altText: initialData?.altText || "",
-    prepTime: initialData?.prepTime || "",
+    preparationTime: initialData?.preparationTime || "",
   });
 
   // 2. File Upload Handler
@@ -397,9 +397,9 @@ const AddEditMenuItem = ({ initialData = null }) => {
                   <Label>Preparation Time (mins)</Label>
                   <Input
                     type="number"
-                    value={formData.prepTime}
+                    value={formData.preparationTime}
                     onChange={(e) =>
-                      handleInputChange("prepTime", e.target.value)
+                      handleInputChange("preparationTime", e.target.value)
                     }
                   />
                 </div>
