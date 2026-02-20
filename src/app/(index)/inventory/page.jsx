@@ -2,14 +2,22 @@
 
 import Header from "@/components/Inventory/Header";
 import Actions from "@/components/Inventory/Actions";
-import { IndianRupee, Clock } from "lucide-react";
+import { IndianRupee, Clock, Bug } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
+import { CheckCircle2Icon } from "lucide-react";
+import {
+  Alert,
+  // AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 const InventoryManagement = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     const fetchFoodItems = async () => {
@@ -41,15 +49,38 @@ const InventoryManagement = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8 p-6 bg-transparent min-h-screen">
-      <Header />
+    <>
+      {showSuccess && (
+        <div className="fixed top-10 z-99999 right-10 bg-green-200 rounded-lg shadow-md p-1">
+          <Alert variant="success">
+            <CheckCircle2Icon />
+            <AlertTitle>Item deleted successfully</AlertTitle>
+            <AlertDescription>
+              Your item has been deleted successfully.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      {showError && (
+        <div className="fixed top-10 z-99999 right-10 bg-red-200 rounded-lg shadow-md p-1">
+          <Alert variant="destructive" className="bg-transparent border-0">
+            <Bug />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Failed to delete item. Please try again later.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      <div className="flex flex-col gap-8 p-6 bg-transparent min-h-screen">
+        <Header />
 
-      {/* Clay Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {foodItems.map((item) => (
-          <div
-            key={item._id || item.id}
-            className="
+        {/* Clay Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {foodItems.map((item) => (
+            <div
+              key={item._id || item.id}
+              className="
               group
               rounded-2xl
               bg-gradient-to-br from-white to-slate-100
@@ -59,46 +90,46 @@ const InventoryManagement = () => {
               hover:-translate-y-1
               overflow-hidden
             "
-          >
-            {/* Image */}
-            <div className="overflow-hidden h-40 rounded-t-2xl flex justify-center items-center ">
-              <Image
-                src={
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.images?.url}` ||
-                  "https://placehold.co/400x400/png?text=No+Image"
-                }
-                alt={item.images?.alt || item.name}
-                width={200}
-                height={200}
-                loading="eager"
-                unoptimized
-              />
+            >
+              {/* Image */}
+              <div className="overflow-hidden h-40 rounded-t-2xl flex justify-center items-center ">
+                <Image
+                  src={
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.images?.url}` ||
+                    "https://placehold.co/400x400/png?text=No+Image"
+                  }
+                  alt={item.images?.alt || item.name}
+                  width={200}
+                  height={200}
+                  loading="eager"
+                  unoptimized
+                />
 
-              {/* Clay badges */}
-              <div className="absolute top-3 left-3 flex flex-col gap-2">
-                {item.isNewArrival && <ClayBadge color="blue">New</ClayBadge>}
-                {item.isBestSeller && (
-                  <ClayBadge color="amber">Best Seller</ClayBadge>
-                )}
+                {/* Clay badges */}
+                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                  {item.isNewArrival && <ClayBadge color="blue">New</ClayBadge>}
+                  {item.isBestSeller && (
+                    <ClayBadge color="amber">Best Seller</ClayBadge>
+                  )}
+                </div>
+
+                <div className="absolute top-3 right-3">
+                  <ClayBadge color={item.isAvailable ? "green" : "red"}>
+                    {item.isAvailable ? "Available" : "Out of Stock"}
+                  </ClayBadge>
+                </div>
               </div>
 
-              <div className="absolute top-3 right-3">
-                <ClayBadge color={item.isAvailable ? "green" : "red"}>
-                  {item.isAvailable ? "Available" : "Out of Stock"}
-                </ClayBadge>
-              </div>
-            </div>
+              {/* Content */}
+              <div className="p-5 flex flex-col gap-4">
+                {/* Title */}
+                <div className="flex justify-between items-start">
+                  <h2 className="font-semibold text-slate-800 text-lg line-clamp-1">
+                    {item.name}
+                  </h2>
 
-            {/* Content */}
-            <div className="p-5 flex flex-col gap-4">
-              {/* Title */}
-              <div className="flex justify-between items-start">
-                <h2 className="font-semibold text-slate-800 text-lg line-clamp-1">
-                  {item.name}
-                </h2>
-
-                <div
-                  className="
+                  <div
+                    className="
                   px-2 py-1
                   text-[10px]
                   rounded-lg
@@ -106,26 +137,26 @@ const InventoryManagement = () => {
                   shadow-inner
                   capitalize
                 "
-                >
-                  {item.category}
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-sm text-slate-500 line-clamp-2 min-h-[40px]">
-                {item.description}
-              </p>
-
-              {/* Meta */}
-              <div className="flex items-center gap-4 text-xs text-slate-400">
-                <div className="flex items-center gap-1">
-                  <Clock size={14} />
-                  {item.preparationTime} mins
+                  >
+                    {item.category}
+                  </div>
                 </div>
 
-                {item.stock !== null && (
-                  <div
-                    className={`
+                {/* Description */}
+                <p className="text-sm text-slate-500 line-clamp-2 min-h-[40px]">
+                  {item.description}
+                </p>
+
+                {/* Meta */}
+                <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <div className="flex items-center gap-1">
+                    <Clock size={14} />
+                    {item.preparationTime} mins
+                  </div>
+
+                  {item.stock !== null && (
+                    <div
+                      className={`
                       px-2 py-0.5 rounded-md shadow-inner
                       ${
                         item.stock <= item.lowStockThreshold
@@ -133,41 +164,47 @@ const InventoryManagement = () => {
                           : "bg-slate-100"
                       }
                     `}
-                  >
-                    Stock: {item.stock}
-                  </div>
-                )}
-              </div>
-
-              {/* Price + Actions */}
-              <div className="flex justify-between items-center mt-2">
-                <div className="flex flex-col">
-                  {item.discountPrice && (
-                    <span className="text-xs text-slate-400 line-through">
-                      ₹{item.originalPrice}
-                    </span>
+                    >
+                      Stock: {item.stock}
+                    </div>
                   )}
+                </div>
 
-                  <div
-                    className="
+                {/* Price + Actions */}
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex flex-col">
+                    {item.discountPrice && (
+                      <span className="text-xs text-slate-400 line-through">
+                        ₹{item.originalPrice}
+                      </span>
+                    )}
+
+                    <div
+                      className="
                     flex items-center
                     font-bold
                     text-xl
                     text-slate-800
                   "
-                  >
-                    <IndianRupee size={18} />
-                    {item.discountPrice || item.originalPrice}
+                    >
+                      <IndianRupee size={18} />
+                      {item.discountPrice || item.originalPrice}
+                    </div>
                   </div>
-                </div>
 
-                <Actions data={item} />
+                  <Actions
+                    data={item}
+                    setShowSuccess={setShowSuccess}
+                    setShowError={setShowError}
+                    setFoodItems={setFoodItems}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
