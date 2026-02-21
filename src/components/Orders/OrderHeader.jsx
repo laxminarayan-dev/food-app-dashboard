@@ -62,14 +62,14 @@ const OrderHeader = ({ onAddData }) => {
       </div>
       <div className="max-w-[38rem] flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Order Entries</h1>
-        <button
+        {/* <button
           onClick={() => {
             setIsModalOpen(true);
           }}
           className="bg-white text-sm px-3 py-2 rounded-full border border-gray-200 shadow-xs cursor-pointer flex justify-center items-center gap-1 hover:bg-gray-50"
         >
           <Plus size={16} /> Add Order Entry
-        </button>
+        </button> */}
       </div>
 
       {/* Modal */}

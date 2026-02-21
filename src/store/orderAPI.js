@@ -6,7 +6,9 @@ export const fetchAllOrder = async () => {
         const res = await fetch(`${BACKEND_URL}/api/orders`, {
             cache: "no-store",
         });
-        return await res.json();
+        const data = await res.json();
+        return data["orders"]
+
     } catch (err) {
         return [];
     }

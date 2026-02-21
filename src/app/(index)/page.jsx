@@ -1,10 +1,10 @@
 "use client";
 import KPIBoxGroup from "@/components/Dashboard/KpiBox";
 import ChartGroup from "@/components/Charts/ChartGroup";
-import TableGroup from "@/components/Dashboard/TableGroup";
 import fetchDashboardData, { initialData } from "@/store/dashboardAPI";
 import { useEffect, useState } from "react";
 import Loader from "@/components/Global/Loader";
+import Socket from "@/components/Socket/socket";
 
 const Home = () => {
   const [data, setData] = useState(initialData);
@@ -19,6 +19,20 @@ const Home = () => {
     const dashboardData = await fetchDashboardData(setLoadingFun);
     setData(dashboardData);
   };
+
+  useEffect(() => {
+    if (Socket.connected) {
+      console.log("Already connected to Socket.IO server");
+    } else {
+      Socket.on("connect", () => {
+        console.log("Connected to Socket.IO server");
+      });
+    }
+
+    Socket.on("disconnect", () => {
+      console.log("Disconnected from Socket.IO server");
+    });
+  }, []);
 
   useEffect(() => {
     loadData(setLoadingFun);
@@ -93,8 +107,6 @@ const Home = () => {
             >
               <ChartGroup chartData={data.chartData} />
             </div>
-
-            {/* <TableGroup tablesData={data.tablesData} /> */}
           </div>
         </div>
       )}

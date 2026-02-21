@@ -1,8 +1,6 @@
 import ChartCard from "./ChartCard";
 
 const ChartGroup = ({ chartData }) => {
-  console.log("Rendering ChartGroup with data:", chartData);
-
   return (
     <div className="max-w-7xl mx-auto mb-12">
       {/* Section Header */}
