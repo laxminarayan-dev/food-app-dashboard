@@ -29,8 +29,8 @@ export const STATUS_CONFIG = {
     badge: "bg-emerald-50 text-emerald-700 border border-emerald-200",
     dot: "bg-emerald-500",
   },
-  canceled: {
-    label: "Canceled",
+  cancelled: {
+    label: "Cancelled",
     badge: "bg-red-50 text-red-600 border border-red-200",
     dot: "bg-red-500",
   },

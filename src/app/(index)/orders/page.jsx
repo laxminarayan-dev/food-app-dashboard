@@ -17,35 +17,35 @@ const OrdersHistory = () => {
 
   // socket connection status logging
   useEffect(() => {
-    if (Socket.connected) {
-      return;
-    } else {
-      Socket.on("connect", () => {
-        console.log("Connected to Socket.IO server");
-      });
-    }
+    Socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+
+    Socket.on("admin-order-updated", (updatedOrder) => {
+      console.log("Received order update:", updatedOrder);
+      setData((prevData) =>
+        prevData.map((order) => (order._id === updatedOrder._id ? updatedOrder : order))
+      );
+    });
+
     Socket.on("new-order", (order) => {
       console.log("Received new order:", order);
       setData((prevData) => [order, ...prevData]);
     });
 
-    Socket.on("disconnect", () => {
-      console.log("Disconnected from Socket.IO server");
+    Socket.on("admin-order-cancelled", (cancelledOrder) => {
+      setData((prevData) => prevData.filter((order) => order._id !== cancelledOrder._id));
     });
-  }, []);
-
-  useEffect(() => {
-    if (Socket.connected) {
-      return;
-    } else {
-      Socket.on("connect", () => {
-        console.log("Connected to Socket.IO server");
-      });
-    }
 
     Socket.on("disconnect", () => {
       console.log("Disconnected from Socket.IO server");
     });
+
+    return () => {
+      Socket.off("admin-order-updated");
+      Socket.off("new-order");
+      Socket.off("admin-order-cancelled");
+    };
   }, []);
 
   return (

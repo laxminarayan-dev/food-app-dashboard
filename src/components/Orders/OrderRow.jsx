@@ -1,9 +1,69 @@
 "use client";
-import { Fragment, useState, useEffect, useRef } from "react";
-import { ChevronDown } from "lucide-react";
+import { Fragment, useState, useEffect } from "react";
+import { ChevronDown, Check, X, ChefHat, Bike, PackageCheck } from "lucide-react";
 import { STATUS_CONFIG } from "./OrderTable";
 import { updateOrder } from "@/store/orderAPI";
 
+// ─── Status Machine ───────────────────────────────────────────────────────────
+// Defines what action buttons appear for each status, and what status they
+// transition to. null nextActions means the order is in a terminal state.
+const STATUS_MACHINE = {
+    placed: {
+        nextActions: [
+            {
+                label: "Accept",
+                icon: Check,
+                nextStatus: "accepted",
+                style: "bg-emerald-500 hover:bg-emerald-600 text-white",
+                iconStyle: "text-white",
+            },
+            {
+                label: "Reject",
+                icon: X,
+                nextStatus: "rejected",
+                style: "bg-red-50 hover:bg-red-100 text-red-600 border border-red-200",
+                iconStyle: "text-red-500",
+            },
+        ],
+    },
+    accepted: {
+        nextActions: [
+            {
+                label: "Mark as Ready",
+                icon: ChefHat,
+                nextStatus: "ready",
+                style: "bg-amber-500 hover:bg-amber-600 text-white",
+                iconStyle: "text-white",
+            },
+        ],
+    },
+    ready: {
+        nextActions: [
+            {
+                label: "Out for Delivery",
+                icon: Bike,
+                nextStatus: "out_for_delivery",
+                style: "bg-blue-500 hover:bg-blue-600 text-white",
+                iconStyle: "text-white",
+            },
+        ],
+    },
+    out_for_delivery: {
+        nextActions: [
+            {
+                label: "Mark Delivered",
+                icon: PackageCheck,
+                nextStatus: "delivered",
+                style: "bg-indigo-500 hover:bg-indigo-600 text-white",
+                iconStyle: "text-white",
+            },
+        ],
+    },
+    delivered: { nextActions: null },   // terminal
+    rejected: { nextActions: null },    // terminal
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
     const config = STATUS_CONFIG[status] || STATUS_CONFIG.placed;
     return (
@@ -22,51 +82,97 @@ const formatDate = (date) => {
     };
 };
 
-function OrderRow({ order, riders, isLast }) {
+const chevronBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`;
+const selectClass =
+    "h-8 rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer appearance-none pr-7 bg-no-repeat bg-[right_8px_center]";
+
+// ─── StatusActions ─────────────────────────────────────────────────────────────
+// Renders the contextual action buttons based on current status
+function StatusActions({ currentStatus, onAction, isUpdating }) {
+    const machine = STATUS_MACHINE[currentStatus];
+
+    // Terminal states — nothing to do
+    if (!machine || !machine.nextActions) {
+        const isDelivered = currentStatus === "delivered";
+        return (
+            <span className={`text-[12px] font-light px-2.5 py-1 rounded-full ${isDelivered ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+                {isDelivered ? "✓ Completed" : "✗ Rejected"}
+            </span>
+        );
+    }
+
+    return (
+        <div className="flex items-center gap-1.5 flex-wrap">
+            {machine.nextActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                    <button
+                        key={action.nextStatus}
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={() => onAction(action.nextStatus)}
+                        className={`
+                            inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-light
+                            transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+                            whitespace-nowrap shadow-sm
+                            ${action.style}
+                        `}
+                    >
+                        <Icon size={11} className={action.iconStyle} />
+                        {isUpdating ? "Saving…" : action.label}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+// ─── OrderRow ──────────────────────────────────────────────────────────────────
+export default function OrderRow({ order, riders, isLast }) {
     const [isOpen, setIsOpen] = useState(false);
     const [orderData, setOrderData] = useState(order);
     const [selectedRider, setSelectedRider] = useState(orderData.riderInfo?._id || "");
-    const [selectedStatus, setSelectedStatus] = useState(orderData.status || "placed");
-    const isDirty =
-        selectedStatus !== (orderData.status || "placed") ||
-        selectedRider !== (orderData.riderInfo?._id || "");
     const [isUpdating, setIsUpdating] = useState(false);
 
-
-    useEffect(() => {
-        setSelectedRider(orderData.riderInfo?._id || "");
-    }, [orderData.riderInfo?._id]);
-
-    useEffect(() => {
-        setSelectedStatus(orderData.status || "placed");
-    }, [orderData.status]);
+    // Sync when parent refreshes data
+    useEffect(() => { setOrderData(order); }, [order]);
+    useEffect(() => { setSelectedRider(orderData.riderInfo?._id || ""); }, [orderData.riderInfo?._id]);
 
     const { date, time } = formatDate(orderData.createdAt);
+    const currentStatus = orderData.status || "placed";
 
-    const handleRiderChange = (e) => {
-        setSelectedRider(e.target.value);
+    // Rider assignment — only show Update btn if rider changed
+    const riderDirty = selectedRider !== (orderData.riderInfo?._id || "");
+
+    const handleRiderChange = (e) => setSelectedRider(e.target.value);
+
+    // Called by StatusActions when an action button is clicked
+    const handleStatusAction = async (nextStatus) => {
+        const updated = await updateOrder(
+            {
+                ...orderData,
+                status: nextStatus,
+                riderInfo: riders.find((r) => r._id === selectedRider) || orderData.riderInfo || null,
+            },
+            setIsUpdating
+        );
+        setOrderData(updated.order);
     };
 
-    const handleStatusChange = (e) => {
-        setSelectedStatus(e.target.value);
+    // Called when only rider changes (status unchanged)
+    const handleRiderUpdate = async () => {
+        const updated = await updateOrder(
+            { ...orderData, riderInfo: riders.find((r) => r._id === selectedRider) || null },
+            setIsUpdating
+        );
+        setOrderData(updated.order);
     };
-
-    const handleUpdate = async () => {
-        let res = await updateOrder({ ...orderData, status: selectedStatus, riderInfo: riders.find(r => r._id === selectedRider) || null }, setIsUpdating)
-        setOrderData(res.order);
-    };
-
-    const selectClass =
-        "h-8 rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer appearance-none pr-7 bg-no-repeat bg-[right_8px_center]";
-
-    const chevronBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`;
 
     return (
         <Fragment>
-            <tr
-                className={`transition-colors duration-150 hover:bg-gray-50 ${isOpen ? "bg-gray-50" : ""} ${!isOpen && !isLast ? "border-b border-gray-50" : ""}`}
-            >
-                {/* OrderData ID */}
+            <tr className={`transition-colors duration-150 hover:bg-gray-50 ${isOpen ? "bg-gray-50" : ""} ${!isOpen && !isLast ? "border-b border-gray-50" : ""}`}>
+
+                {/* Order ID */}
                 <td className="px-4 py-3.5 text-center">
                     <span className="font-mono text-[11px] font-medium bg-gray-100 border border-gray-200 text-gray-500 rounded-md px-2 py-1 tracking-wide">
                         #{orderData._id.slice(-6).toUpperCase()}
@@ -86,83 +192,69 @@ function OrderRow({ order, riders, isLast }) {
                     </span>
                 </td>
 
-                {/* Status Badge */}
+                {/* Current Status Badge */}
                 <td className="px-4 py-3.5">
-                    <StatusBadge status={selectedStatus} />
+                    <StatusBadge status={currentStatus} />
                 </td>
 
                 {/* Assign Rider */}
                 <td className="px-4 py-3.5">
-                    <div className="relative w-36">
-                        <select
-                            value={selectedRider}
-                            onChange={handleRiderChange}
-                            className={`${selectClass} w-full`}
-                            style={{ backgroundImage: chevronBg }}
-                        >
-                            <option value="" disabled>Assign Rider</option>
-                            {riders.map((rider) => (
-                                <option key={rider._id} value={rider._id}>
-                                    {rider.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </td>
-
-                {/* Change Status */}
-                <td className="px-4 py-3.5">
-                    <div className="relative w-44">
-                        <select
-                            value={selectedStatus}
-                            onChange={handleStatusChange}
-                            className={`${selectClass} w-full`}
-                            style={{ backgroundImage: chevronBg }}
-                        >
-                            {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
-                                <option key={val} value={val}>
-                                    {cfg.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </td>
-
-                {/* Actions */}
-                <td className="pr-3 py-3.5">
                     <div className="flex items-center gap-2">
-                        {isDirty && (
+                        <div className="relative w-36">
+                            <select
+                                value={selectedRider}
+                                onChange={handleRiderChange}
+                                className={`${selectClass} w-full`}
+                                style={{ backgroundImage: chevronBg }}
+                            >
+                                <option value="" disabled>Assign Rider</option>
+                                {riders.map((rider) => (
+                                    <option key={rider._id} value={rider._id}>{rider.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {riderDirty && (
                             <button
                                 type="button"
-                                onClick={handleUpdate}
+                                onClick={handleRiderUpdate}
                                 disabled={isUpdating}
-                                className="h-7 px-2.5 rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-[11px] font-semibold transition-colors duration-150 whitespace-nowrap"
+                                className="h-7 px-2.5 rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-[11px] font-semibold transition-colors whitespace-nowrap"
                             >
-                                {isUpdating ? "Saving…" : "Update"}
+                                {isUpdating ? "Saving…" : "Assign"}
                             </button>
                         )}
-                        <button
-                            type="button"
-                            onClick={() => setIsOpen((v) => !v)}
-                            aria-expanded={isOpen}
-                            aria-controls={`orderData-details-${orderData._id}`}
-                            className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 hover:border-gray-300 transition-all duration-150"
-                        >
-                            <ChevronDown
-                                size={13}
-                                className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-                            />
-                        </button>
                     </div>
+                </td>
+
+                {/* Status Actions (replaces the old status dropdown) */}
+                <td className="px-4 py-3.5" colSpan={2}>
+                    <StatusActions
+                        currentStatus={currentStatus}
+                        onAction={handleStatusAction}
+                        isUpdating={isUpdating}
+                    />
+                </td>
+
+                {/* Expand/Collapse */}
+                <td className="pr-3 py-3.5">
+                    <button
+                        type="button"
+                        onClick={() => setIsOpen((v) => !v)}
+                        aria-expanded={isOpen}
+                        aria-controls={`order-details-${orderData._id}`}
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 hover:border-gray-300 transition-all duration-150"
+                    >
+                        <ChevronDown size={13} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
                 </td>
             </tr>
 
             {/* Expanded detail row */}
             <tr
-                id={`orderData-details-${orderData._id}`}
+                id={`order-details-${orderData._id}`}
                 className={`bg-gray-50 ${!isLast ? "border-b border-gray-100" : ""}`}
             >
-                <td colSpan={7} className="p-0">
+                <td colSpan={8} className="p-0">
                     <div
                         className="overflow-hidden transition-all duration-300 ease-in-out"
                         style={{ maxHeight: isOpen ? "400px" : "0px" }}
@@ -200,5 +292,3 @@ function OrderRow({ order, riders, isLast }) {
         </Fragment>
     );
 }
-
-export default OrderRow;
