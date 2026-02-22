@@ -52,7 +52,7 @@ const OrdersHistory = () => {
     <Fragment>
       <OrderHeader onAddData={loadData} />
       {data.length <= 0 ? (
-        <div className="w-full bg-white shadow h-() flex justify-center items-center rounded-md">
+        <div className="w-full bg-white shadow h-[calc(100vh-20rem)] flex justify-center items-center rounded-md">
           <h1 className="text-lg text-gray-700">No data to display.</h1>
         </div>
       ) : (
