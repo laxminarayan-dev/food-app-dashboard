@@ -227,19 +227,10 @@ const Navbar = () => {
   ];
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-[101] bg-white/85 backdrop-blur-md  min-h-16 max-h-16 border-b-2 border-slate-400">
+      <nav className="fixed top-0 left-0 w-full z-100 bg-white min-h-16 max-h-16 border-b-2 border-slate-900">
         <div className="px-4 sm:px-6 py-3 mx-auto flex items-center justify-between bg-white border-b border-slate-200 shadow-sm">
           {/* Left */}
-          <div className="flex items-center gap-3">
-            <span
-              className="font-semibold text-2xl"
-              onClick={() => {
-                router.push("/");
-              }}
-            >
-              Mr Halwai
-            </span>
-          </div>
+
 
           {/* Right */}
           <div className="flex items-center gap-3">
@@ -399,25 +390,26 @@ const Navbar = () => {
       </nav>
 
       {/* Sidebar Box */}
-      <div className="flex">
+      <div className="flex  ">
         {/* Sidebar */}
         <aside
-          className={`fixed top-19 z-[101] h-[calc(100vh-4.5rem)] p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`border-r-2 fixed top-0 z-100 h-screen p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
             } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
           aria-label="Main sidebar"
         >
           <div className="flex flex-col justify-between h-full">
+
             {/* Sidebar header */}
             <div className="mb-4">
-              <div className="flex items-center gap-3 px-2 mb-4">
+              <div className="flex items-center gap-3 px-2 mb-6 mt-2 cursor-pointer" onClick={() => router.push("/")}>
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-400 inline-flex items-center justify-center shadow-sm">
                   <Store className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-gray-900">
+                  <div className="text-2xl font-semibold text-gray-900">
                     Mr Halwai
                   </div>
-                  <div className="text-xs text-gray-500">Admin Dashboard</div>
+                  <div className="text-sm  text-gray-500">Admin Dashboard</div>
                 </div>
               </div>
 
