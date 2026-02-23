@@ -144,7 +144,6 @@ const AddEmployee = ({ onBack, onSuccess }) => {
     }
     addEmployee(form)
       .then((res) => {
-        console.log("Employee added:", res);
         setSubmitted(true);
       })
       .catch((err) => {

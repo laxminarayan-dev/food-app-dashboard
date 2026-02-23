@@ -38,7 +38,6 @@ const CommonHeader = ({ forWho, fields }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(`Submitting new ${forWho}:`, formData);
     // Add your API call or state management logic here
     setIsModalOpen(false);
   };

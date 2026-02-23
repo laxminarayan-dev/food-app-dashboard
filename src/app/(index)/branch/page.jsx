@@ -138,10 +138,6 @@ const CreateNewBranchPage = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Items loaded:", items.forEach((i) => console.log(i._id)));
-  }, [items]);
-
-  useEffect(() => {
     if (Array.isArray(branches) && branches.length > 0) {
       if (!selectedBranchId) {
         setSelectedBranchId(branches[0]._id);

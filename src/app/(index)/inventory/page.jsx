@@ -39,10 +39,10 @@ const InventoryManagement = () => {
     if (!Socket.connected) {
       Socket.connect();
     }
-    Socket.on("item-updated", (updatedItem) => {
+    Socket.on("item-updated", () => {
       fetchFoodItems(setFoodItems);
     })
-    Socket.on("item-deleted", (deletedItemId) => {
+    Socket.on("item-deleted", () => {
       fetchFoodItems(setFoodItems);
     })
 
@@ -120,14 +120,14 @@ const InventoryManagement = () => {
                 />
 
                 {/* Clay badges */}
-                <div className=" absolute top-3 left-3 flex flex-col gap-2 z-99">
+                <div className=" absolute top-3 left-3 flex flex-col gap-2 z-9">
                   {item.isNewArrival && <ClayBadge color="blue">New</ClayBadge>}
                   {item.isBestSeller && (
                     <ClayBadge color="amber">Best Seller</ClayBadge>
                   )}
                 </div>
 
-                <div className="absolute top-3 right-3 z-99">
+                <div className="absolute top-3 right-3 z-9">
                   <ClayBadge color={item.isAvailable ? "green" : "red"}>
                     {item.isAvailable ? "Available" : "Out of Stock"}
                   </ClayBadge>

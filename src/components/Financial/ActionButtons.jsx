@@ -26,9 +26,6 @@ const ActionButtons = ({ id, fields, data }) => {
         <button
           aria-label="deleteEntry"
           type="button"
-          onClick={() => {
-            console.log(id);
-          }}
         >
           <Trash className="inline-block w-4 h-4 text-red-500 cursor-pointer" />
         </button>

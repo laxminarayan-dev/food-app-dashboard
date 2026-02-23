@@ -29,7 +29,6 @@ const Home = () => {
     });
 
     Socket.on("new-order", () => {
-      console.log("Received 'new-order' event from Socket.IO server");
       loadData(setLoadingFun);
     })
 

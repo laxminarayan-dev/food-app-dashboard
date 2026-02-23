@@ -1,5 +1,4 @@
 "use client";
-import InventoryAddModel from "./AddModel";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,10 +31,6 @@ const Header = () => {
         </button>
       </div>
 
-      <InventoryAddModel
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-      />
     </>
   );
 };

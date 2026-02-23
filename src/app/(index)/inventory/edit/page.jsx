@@ -39,7 +39,7 @@ const EditMenuItem = ({ initialData = null }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingItem, setLoadingItem] = useState(false);
-  const [tagInput, setTagInput] = useState("");
+  const [tagInput, setTagInput] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(initialData?.imageUrl || "");
   const [file, setFile] = useState(null);
   const isEditMode = Boolean(editId || initialData);
@@ -102,13 +102,9 @@ const EditMenuItem = ({ initialData = null }) => {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/items/${editId}`,
         );
-        // if (!res.ok) {
-        //   router.push("/inventory");
-        //   return;
-        // }
+
         const data = await res.json();
         if (!mounted) return;
-        console.log("Fetched item for editing:", data);
         // Map server response into form shape
         setFormData((prev) => ({
           ...prev,
@@ -147,9 +143,9 @@ const EditMenuItem = ({ initialData = null }) => {
           ...prev,
           name: data.name || "",
           description: data.shortDescription || data.description || "",
-          category: data.subCategory || data.category || "",
+          category: data.category || "",
           cuisine: data.cuisine || "",
-          includes: data.includes || [],
+          includes: data.includes || "",
 
           originalPrice:
             data.originalPrice !== undefined && data.originalPrice !== null
@@ -166,7 +162,7 @@ const EditMenuItem = ({ initialData = null }) => {
 
           lowStockThreshold:
             data.lowStockThreshold !== undefined &&
-            data.lowStockThreshold !== null
+              data.lowStockThreshold !== null
               ? data.lowStockThreshold
               : 5,
 
@@ -231,9 +227,7 @@ const EditMenuItem = ({ initialData = null }) => {
   };
 
   const handleCheckboxChange = (group, item) => {
-    console.log("Checkbox change:", group, item);
     const currentItems = formData[group];
-    console.log("Current items before change:", currentItems);
     const newItems = currentItems.includes(item)
       ? currentItems.filter((i) => i !== item)
       : [...currentItems, item];
@@ -286,7 +280,6 @@ const EditMenuItem = ({ initialData = null }) => {
       );
 
       const data = await res.json();
-      console.log("API response:", data);
       if (res.ok) {
         setShowSuccess(true);
         // update preview if backend returned an image url
@@ -316,6 +309,7 @@ const EditMenuItem = ({ initialData = null }) => {
     "Saturday",
     "Sunday",
   ];
+
   const timingOptions = ["Breakfast", "Lunch", "Dinner", "All Day"];
 
   return (
