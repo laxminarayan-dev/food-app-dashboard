@@ -28,7 +28,7 @@ const Actions = ({ data, setShowSuccess, setShowError, setFoodItems }) => {
           Edit
         </Button>
 
-        <AlertDialog>
+        <AlertDialog >
           <AlertDialogTrigger asChild>
             <Button
               className="font-semibold font-mono bg-red-400 text-gray-900  cursor-pointer hover:bg-red-500 transition-colors"
@@ -37,7 +37,7 @@ const Actions = ({ data, setShowSuccess, setShowError, setFoodItems }) => {
               Remove
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent size="sm">
+          <AlertDialogContent size="sm" className="z-999">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>

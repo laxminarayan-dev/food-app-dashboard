@@ -77,6 +77,29 @@ const CreateNewBranchPage = () => {
       });
     })
 
+    Socket.on("item-updated", () => {
+      fetchFoodItems(setItems).catch((err) => {
+        console.error("Error fetching items after update:", err);
+        setItems([]);
+      });
+    });
+
+    Socket.on("item-deleted", async () => {
+      fetchFoodItems(setItems).catch((err) => {
+        console.error("Error fetching items after deletion:", err);
+        setItems([]);
+      });
+      fetchShops().then((data) => {
+        setSelectedBranchCopy(null);
+        setBranches(data);
+        const active = data.find((b) => b._id === selectedBranchId);
+        if (active) setSelectedBranch(active);
+      }).catch((err) => {
+        console.error("Error fetching shops after item deletion:", err);
+        setBranches([]);
+      });
+    });
+
     Socket.on("disconnect", () => {
       console.log("Disconnected from Socket.IO server");
     });

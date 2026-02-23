@@ -7,8 +7,9 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { CheckCircle2Icon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Socket from "@/components/Socket/socket";
 
-export const fetchFoodItems = async (setItems, setLoading = () => {}) => {
+export const fetchFoodItems = async (setItems, setLoading = () => { }) => {
   try {
     setLoading(true);
     const response = await fetch(
@@ -22,6 +23,8 @@ export const fetchFoodItems = async (setItems, setLoading = () => {}) => {
     setLoading(false);
   }
 };
+
+
 const InventoryManagement = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,23 @@ const InventoryManagement = () => {
 
   useEffect(() => {
     fetchFoodItems(setFoodItems, setLoading);
+  }, []);
+
+  useEffect(() => {
+    if (!Socket.connected) {
+      Socket.connect();
+    }
+    Socket.on("item-updated", (updatedItem) => {
+      fetchFoodItems(setFoodItems);
+    })
+    Socket.on("item-deleted", (deletedItemId) => {
+      fetchFoodItems(setFoodItems);
+    })
+
+    return () => {
+      Socket.off("item-updated");
+      Socket.off("item-deleted");
+    };
   }, []);
 
   if (loading) {
@@ -68,7 +88,7 @@ const InventoryManagement = () => {
         <Header />
 
         {/* Clay Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2  xl:grid-cols-4 gap-8">
           {foodItems.map((item) => (
             <div
               key={item._id || item.id}
@@ -100,14 +120,14 @@ const InventoryManagement = () => {
                 />
 
                 {/* Clay badges */}
-                <div className=" absolute top-3 left-3 flex flex-col gap-2">
+                <div className=" absolute top-3 left-3 flex flex-col gap-2 z-99">
                   {item.isNewArrival && <ClayBadge color="blue">New</ClayBadge>}
                   {item.isBestSeller && (
                     <ClayBadge color="amber">Best Seller</ClayBadge>
                   )}
                 </div>
 
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 z-99">
                   <ClayBadge color={item.isAvailable ? "green" : "red"}>
                     {item.isAvailable ? "Available" : "Out of Stock"}
                   </ClayBadge>
@@ -152,11 +172,10 @@ const InventoryManagement = () => {
                     <div
                       className={`
                       px-2 py-0.5 rounded-md shadow-inner
-                      ${
-                        item.stock <= item.lowStockThreshold
+                      ${item.stock <= item.lowStockThreshold
                           ? "bg-red-100 text-red-500"
                           : "bg-slate-100"
-                      }
+                        }
                     `}
                     >
                       Stock: {item.stock}
