@@ -33,14 +33,14 @@ const getShopStatus = (shop) => {
   if (!shop) return { label: "", className: "" };
   return shop.shopOpen
     ? {
-      label: "Open",
-      className:
-        "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
-    }
+        label: "Open",
+        className:
+          "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
+      }
     : {
-      label: "Closed",
-      className: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
-    };
+        label: "Closed",
+        className: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
+      };
 };
 
 const Navbar = () => {
@@ -229,6 +229,13 @@ const Navbar = () => {
     <>
       <nav className="fixed top-0 left-0 w-full z-100 bg-white min-h-16 max-h-16 border-b-2 border-slate-900">
         <div className="px-4 sm:px-6 py-3 mx-auto flex items-center justify-end bg-white border-b border-slate-200 shadow-sm">
+          {/* Left - Placeholder for logo or title if needed in future */}
+          <div
+            className="text-2xl flex md:hidden items-center gap-3 mr-auto cursor-pointer"
+            onClick={() => router.push("/")}
+          >
+            Mr Halwai
+          </div>
           {/* Right */}
           <div className="flex items-center gap-3">
             {/* Branch switcher */}
@@ -390,15 +397,18 @@ const Navbar = () => {
       <div className="flex  ">
         {/* Sidebar */}
         <aside
-          className={`border-r-2 fixed top-0 z-100 h-screen p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
+          className={`border-r-2 fixed top-0 z-100 h-screen p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${
+            isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
           aria-label="Main sidebar"
         >
           <div className="flex flex-col justify-between h-full">
-
             {/* Sidebar header */}
             <div className="mb-4">
-              <div className="flex items-center gap-3 px-2 mb-6 mt-2 cursor-pointer" onClick={() => router.push("/")}>
+              <div
+                className="flex items-center gap-3 px-2 mb-6 mt-2 cursor-pointer"
+                onClick={() => router.push("/")}
+              >
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-400 inline-flex items-center justify-center shadow-sm">
                   <Store className="w-5 h-5 text-white" />
                 </div>
@@ -447,10 +457,11 @@ const Navbar = () => {
                             if (isMobileSidebarOpen)
                               setIsMobileSidebarOpen(false);
                           }}
-                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${isActive
-                            ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
-                            : "text-gray-700 hover:bg-slate-50"
-                            }`}
+                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
+                            isActive
+                              ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
+                              : "text-gray-700 hover:bg-slate-50"
+                          }`}
                         >
                           <span
                             className={`inline-flex items-center justify-center w-9 h-9 rounded-md ${isActive ? "bg-indigo-500 text-white" : "bg-slate-100 text-indigo-500 group-hover:bg-indigo-50"}`}
@@ -473,10 +484,11 @@ const Navbar = () => {
 
         {/* Overlay for mobile sidebar */}
         <div
-          className={`fixed bg-slate-900/70 z-[100] md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${isMobileSidebarOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-            }`}
+          className={`fixed bg-slate-900/70 z-99 md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${
+            isMobileSidebarOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
           onClick={() => setIsMobileSidebarOpen(false)}
           aria-hidden="true"
         />
